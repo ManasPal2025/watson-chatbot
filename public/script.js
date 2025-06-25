@@ -557,9 +557,19 @@ class Chatbot {
         messageDiv.innerHTML = `
             <div class="message-content">
                 <div class="message-text">${this.escapeHtml(text)}</div>
+                <button class="translate-btn" title="Translate to Spanish" aria-label="Translate"><i class="fas fa-globe"></i></button>
+                <div class="translated-text" style="display:none;"></div>
             </div>
             <div class="message-time">${this.getCurrentTime()}</div>
         `;
+        
+        // Add translate button event
+        const translateBtn = messageDiv.querySelector('.translate-btn');
+        const messageText = messageDiv.querySelector('.message-text');
+        const translatedDiv = messageDiv.querySelector('.translated-text');
+        translateBtn.addEventListener('click', () => {
+            this.handleTranslate(messageText.textContent, translatedDiv, translateBtn);
+        });
         
         this.chatMessages.appendChild(messageDiv);
         this.scrollToBottom();
@@ -577,32 +587,35 @@ class Chatbot {
                     </div>
                 </div>
                 <div class="message-text">${this.escapeHtml(text)}</div>
+                <button class="translate-btn" title="Translate to Spanish" aria-label="Translate"><i class="fas fa-globe"></i></button>
+                <div class="translated-text" style="display:none;"></div>
             </div>
             <div class="message-time">${this.getCurrentTime()}</div>
         `;
+        // Add translate button event
+        const translateBtn = messageDiv.querySelector('.translate-btn');
+        const messageText = messageDiv.querySelector('.message-text');
+        const translatedDiv = messageDiv.querySelector('.translated-text');
+        translateBtn.addEventListener('click', () => {
+            this.handleTranslate(messageText.textContent, translatedDiv, translateBtn);
+        });
         
         this.chatMessages.appendChild(messageDiv);
         this.scrollToBottom();
     }
 
-    addOptionButtons(options) {
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.className = 'option-buttons';
-        
-        options.forEach(option => {
-            const button = document.createElement('button');
-            button.className = 'option-btn';
-            button.textContent = option.label;
-            button.addEventListener('click', () => {
-                this.messageInput.value = option.label;
-                this.sendMessage();
-                buttonsContainer.remove();
-            });
-            buttonsContainer.appendChild(button);
-        });
-        
-        this.chatMessages.appendChild(buttonsContainer);
-        this.scrollToBottom();
+    // Simulated translation function (replace with real API call if needed)
+    async handleTranslate(text, translatedDiv, btn) {
+        btn.disabled = true;
+        btn.textContent = 'Translating...';
+        // Simulate translation delay
+        setTimeout(() => {
+            // Simulated translation (replace with real translation logic)
+            const fakeTranslation = '[ES] ' + text + ' (traducción simulada)';
+            translatedDiv.textContent = fakeTranslation;
+            translatedDiv.style.display = 'block';
+            btn.textContent = '🌐 Translated';
+        }, 800);
     }
 
     handleUserTyping() {
