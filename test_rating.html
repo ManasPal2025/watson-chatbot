@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rating System Test</title>
+    <link rel="stylesheet" href="public/styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .test-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .rating-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .rating-display h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .rating-display pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🌟 Star Rating System Test</h1>
+            <p>Test the interactive star rating functionality for the chatbot</p>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Rating System</h3>
+            <p>Click the buttons below to test different carousel items with rating functionality:</p>
+            
+            <button class="test-button" onclick="testRating('Medical Information', 'Comprehensive medical data and health guidelines')">
+                Test Medical Info Rating
+            </button>
+            
+            <button class="test-button" onclick="testRating('Doctor Search', 'Find and connect with healthcare professionals')">
+                Test Doctor Search Rating
+            </button>
+            
+            <button class="test-button" onclick="testRating('Medicine Database', 'Access to extensive medicine information and dosages')">
+                Test Medicine DB Rating
+            </button>
+            
+            <button class="test-button" onclick="testRating('Health Tips', 'Daily health tips and wellness advice')">
+                Test Health Tips Rating
+            </button>
+        </div>
+
+        <div class="test-section">
+            <h3>Rating Analytics</h3>
+            <p>View stored ratings and analytics:</p>
+            
+            <button class="test-button" onclick="showAllRatings()">
+                Show All Ratings
+            </button>
+            
+            <button class="test-button" onclick="showRatingAnalytics()">
+                Show Rating Analytics
+            </button>
+            
+            <button class="test-button" onclick="clearAllRatings()">
+                Clear All Ratings
+            </button>
+            
+            <div id="ratingDisplay" class="rating-display" style="display: none;">
+                <h4>Rating Data:</h4>
+                <pre id="ratingData"></pre>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>How It Works</h3>
+            <ul>
+                <li><strong>Interactive Stars:</strong> Hover over stars to see preview, click to select rating</li>
+                <li><strong>Feedback:</strong> Get immediate feedback based on your rating</li>
+                <li><strong>Storage:</strong> Ratings are stored in localStorage for persistence</li>
+                <li><strong>Analytics:</strong> View rating distribution and averages in the dashboard</li>
+                <li><strong>Bot Response:</strong> Bot responds differently based on rating level</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Simulate the chatbot's rating system
+        function testRating(title, description) {
+            // Create rating container
+            const ratingContainer = document.createElement('div');
+            ratingContainer.className = 'message bot-message rating-message';
+            ratingContainer.style.margin = '20px 0';
+            ratingContainer.innerHTML = `
+                <div class="message-content">
+                    <div class="message-avatar">
+                        <div class="medical-robot-icon-small">
+                            <i class="fas fa-robot"></i>
+                            <i class="fas fa-cross"></i>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <div class="rating-info">
+                            <h4>${escapeHtml(title)}</h4>
+                            <p>${escapeHtml(description)}</p>
+                            <p class="rating-prompt">How would you rate this information?</p>
+                        </div>
+                        <div class="star-rating">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                        <div class="rating-feedback" style="display: none;">
+                            <p class="rating-text"></p>
+                            <button class="rating-submit-btn">Submit Rating</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Insert before the test sections
+            const testContainer = document.querySelector('.test-container');
+            testContainer.insertBefore(ratingContainer, testContainer.firstChild);
+
+            // Add event listeners
+            const stars = ratingContainer.querySelectorAll('.star');
+            const ratingFeedback = ratingContainer.querySelector('.rating-feedback');
+            const ratingText = ratingContainer.querySelector('.rating-text');
+            const submitBtn = ratingContainer.querySelector('.rating-submit-btn');
+            let selectedRating = 0;
+
+            stars.forEach(star => {
+                star.addEventListener('mouseover', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    highlightStars(stars, rating);
+                });
+
+                star.addEventListener('mouseout', () => {
+                    highlightStars(stars, selectedRating);
+                });
+
+                star.addEventListener('click', () => {
+                    selectedRating = parseInt(star.dataset.rating);
+                    highlightStars(stars, selectedRating);
+                    showRatingFeedback(ratingFeedback, ratingText, selectedRating);
+                });
+            });
+
+            submitBtn.addEventListener('click', () => {
+                submitRating(title, selectedRating, ratingContainer);
+            });
+        }
+
+        function highlightStars(stars, rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function showRatingFeedback(feedbackElement, textElement, rating) {
+            const feedbackMessages = {
+                1: "Poor - This information wasn't helpful at all.",
+                2: "Fair - This information was somewhat helpful.",
+                3: "Good - This information was helpful.",
+                4: "Very Good - This information was very helpful.",
+                5: "Excellent - This information was extremely helpful!"
+            };
+
+            textElement.textContent = feedbackMessages[rating];
+            feedbackElement.style.display = 'block';
+        }
+
+        function submitRating(title, rating, ratingContainer) {
+            // Store rating
+            const ratings = JSON.parse(localStorage.getItem('chatbotRatings') || '{}');
+            ratings[title] = {
+                rating: rating,
+                timestamp: new Date().toISOString(),
+                count: (ratings[title]?.count || 0) + 1
+            };
+            localStorage.setItem('chatbotRatings', JSON.stringify(ratings));
+
+            // Show success message
+            alert(`Rating submitted: ${rating} stars for "${title}"`);
+            
+            // Remove rating container
+            ratingContainer.remove();
+        }
+
+        function showAllRatings() {
+            const ratings = JSON.parse(localStorage.getItem('chatbotRatings') || '{}');
+            const display = document.getElementById('ratingDisplay');
+            const data = document.getElementById('ratingData');
+            
+            data.textContent = JSON.stringify(ratings, null, 2);
+            display.style.display = 'block';
+        }
+
+        function showRatingAnalytics() {
+            const ratings = JSON.parse(localStorage.getItem('chatbotRatings') || '{}');
+            const distribution = [0, 0, 0, 0, 0];
+            let totalRating = 0;
+            let totalCount = 0;
+
+            Object.values(ratings).forEach(item => {
+                if (item.rating >= 1 && item.rating <= 5) {
+                    distribution[item.rating - 1]++;
+                    totalRating += item.rating;
+                    totalCount++;
+                }
+            });
+
+            const analytics = {
+                distribution: distribution,
+                average: totalCount > 0 ? totalRating / totalCount : 0,
+                total: totalCount,
+                breakdown: {
+                    '1 Star': distribution[0],
+                    '2 Stars': distribution[1],
+                    '3 Stars': distribution[2],
+                    '4 Stars': distribution[3],
+                    '5 Stars': distribution[4]
+                }
+            };
+
+            const display = document.getElementById('ratingDisplay');
+            const data = document.getElementById('ratingData');
+            
+            data.textContent = JSON.stringify(analytics, null, 2);
+            display.style.display = 'block';
+        }
+
+        function clearAllRatings() {
+            if (confirm('Are you sure you want to clear all ratings?')) {
+                localStorage.removeItem('chatbotRatings');
+                alert('All ratings cleared!');
+                document.getElementById('ratingDisplay').style.display = 'none';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html> 

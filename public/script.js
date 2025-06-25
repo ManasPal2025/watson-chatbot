@@ -345,10 +345,142 @@ class Chatbot {
         // Add user message showing what they clicked
         this.addUserMessage(`I'm interested in: ${title}`);
         
-        // Simulate bot response (you can customize this)
+        // Create rating system
+        const ratingMessage = this.createRatingSystem(title, description);
+        
+        // Add the rating message to chat
+        this.chatMessages.appendChild(ratingMessage);
+        this.scrollToBottom();
+    }
+
+    createRatingSystem(title, description) {
+        const ratingContainer = document.createElement('div');
+        ratingContainer.className = 'message bot-message rating-message';
+        ratingContainer.innerHTML = `
+            <div class="message-content">
+                <div class="message-avatar">
+                    <div class="medical-robot-icon-small">
+                        <i class="fas fa-robot"></i>
+                        <i class="fas fa-cross"></i>
+                    </div>
+                </div>
+                <div class="message-text">
+                    <div class="rating-info">
+                        <h4>${this.escapeHtml(title)}</h4>
+                        <p>${this.escapeHtml(description)}</p>
+                        <p class="rating-prompt">How would you rate this information?</p>
+                    </div>
+                    <div class="star-rating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <div class="rating-feedback" style="display: none;">
+                        <p class="rating-text"></p>
+                        <button class="rating-submit-btn">Submit Rating</button>
+                    </div>
+                </div>
+            </div>
+            <div class="message-time">${this.getCurrentTime()}</div>
+        `;
+
+        // Add event listeners for star rating
+        const stars = ratingContainer.querySelectorAll('.star');
+        const ratingFeedback = ratingContainer.querySelector('.rating-feedback');
+        const ratingText = ratingContainer.querySelector('.rating-text');
+        const submitBtn = ratingContainer.querySelector('.rating-submit-btn');
+        let selectedRating = 0;
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', () => {
+                const rating = parseInt(star.dataset.rating);
+                this.highlightStars(stars, rating);
+            });
+
+            star.addEventListener('mouseout', () => {
+                this.highlightStars(stars, selectedRating);
+            });
+
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.dataset.rating);
+                this.highlightStars(stars, selectedRating);
+                this.showRatingFeedback(ratingFeedback, ratingText, selectedRating);
+            });
+        });
+
+        // Handle rating submission
+        submitBtn.addEventListener('click', () => {
+            this.submitRating(title, selectedRating, ratingContainer);
+        });
+
+        return ratingContainer;
+    }
+
+    highlightStars(stars, rating) {
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    }
+
+    showRatingFeedback(feedbackElement, textElement, rating) {
+        const feedbackMessages = {
+            1: "Poor - This information wasn't helpful at all.",
+            2: "Fair - This information was somewhat helpful.",
+            3: "Good - This information was helpful.",
+            4: "Very Good - This information was very helpful.",
+            5: "Excellent - This information was extremely helpful!"
+        };
+
+        textElement.textContent = feedbackMessages[rating];
+        feedbackElement.style.display = 'block';
+    }
+
+    submitRating(title, rating, ratingContainer) {
+        // Store rating in localStorage for persistence
+        const ratings = JSON.parse(localStorage.getItem('chatbotRatings') || '{}');
+        ratings[title] = {
+            rating: rating,
+            timestamp: new Date().toISOString(),
+            count: (ratings[title]?.count || 0) + 1
+        };
+        localStorage.setItem('chatbotRatings', JSON.stringify(ratings));
+
+        // Add user rating message
+        this.addUserMessage(`I rated "${title}" ${rating} star${rating > 1 ? 's' : ''}`);
+
+        // Bot response based on rating
         setTimeout(() => {
-            this.addBotMessage(`Great choice! Here's more information about ${title}: ${description}<br>Is there anything I can help you with ?`);
+            let response = '';
+            if (rating >= 4) {
+                response = `Thank you for the ${rating}-star rating! I'm glad you found the information about "${title}" helpful. Is there anything else you'd like to know?`;
+            } else if (rating >= 3) {
+                response = `Thanks for the ${rating}-star rating for "${title}". I'll work on providing even better information. What else can I help you with?`;
+            } else {
+                response = `I appreciate your ${rating}-star feedback for "${title}". I'll use this to improve my responses. How can I better assist you?`;
+            }
+            this.addBotMessage(response);
         }, 500);
+
+        // Remove the rating container
+        ratingContainer.remove();
+    }
+
+    // Method to get average rating for a specific item
+    getAverageRating(title) {
+        const ratings = JSON.parse(localStorage.getItem('chatbotRatings') || '{}');
+        const itemRating = ratings[title];
+        return itemRating ? itemRating.rating : null;
+    }
+
+    // Method to get all ratings for analytics
+    getAllRatings() {
+        return JSON.parse(localStorage.getItem('chatbotRatings') || '{}');
     }
 
     addUserMessage(text) {
@@ -501,6 +633,7 @@ class Chatbot {
             // Check if canvas elements exist
             const conversationCanvas = document.getElementById('conversationChart');
             const activityCanvas = document.getElementById('activityChart');
+            const ratingCanvas = document.getElementById('ratingChart');
             
             if (!conversationCanvas) {
                 console.error('conversationChart canvas not found!');
@@ -568,11 +701,89 @@ class Chatbot {
                     }
                 }
             });
+
+            // Rating Analytics Chart
+            if (ratingCanvas) {
+                const ratingCtx = ratingCanvas.getContext('2d');
+                const ratingData = this.getRatingAnalytics();
+                
+                new Chart(ratingCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                        datasets: [{
+                            label: 'Number of Ratings',
+                            data: ratingData.distribution,
+                            backgroundColor: [
+                                '#F44336',
+                                '#FF9800',
+                                '#FFC107',
+                                '#4CAF50',
+                                '#2196F3'
+                            ],
+                            borderColor: [
+                                '#D32F2F',
+                                '#F57C00',
+                                '#FFA000',
+                                '#388E3C',
+                                '#1976D2'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: `Average Rating: ${ratingData.average.toFixed(1)}/5.0 (${ratingData.total} total ratings)`,
+                                color: '#333',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             
             console.log('Charts created successfully');
         } catch (error) {
             console.error('Error creating charts:', error);
         }
+    }
+
+    getRatingAnalytics() {
+        const ratings = this.getAllRatings();
+        const distribution = [0, 0, 0, 0, 0]; // 1-5 stars
+        let totalRating = 0;
+        let totalCount = 0;
+
+        Object.values(ratings).forEach(item => {
+            if (item.rating >= 1 && item.rating <= 5) {
+                distribution[item.rating - 1]++;
+                totalRating += item.rating;
+                totalCount++;
+            }
+        });
+
+        return {
+            distribution: distribution,
+            average: totalCount > 0 ? totalRating / totalCount : 0,
+            total: totalCount
+        };
     }
 
     scrollToBottom() {
