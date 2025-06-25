@@ -987,6 +987,19 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Serve test pages
+app.get('/test_doctors_api.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'test_doctors_api.html'));
+});
+
+app.get('/test_medicine_api.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'test_medicine_api.html'));
+});
+
+app.get('/test_carousel.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'test_carousel.html'));
+});
+
 // Start server
 const PORT = process.env.PORT || config.PORT;
 app.listen(PORT, () => {

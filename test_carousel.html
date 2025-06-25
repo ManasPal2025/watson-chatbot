@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel Test - IBM Watson Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-header p {
+            color: #666;
+            margin: 0;
+        }
+        .test-section {
+            margin-bottom: 40px;
+        }
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .json-display {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .carousel-demo {
+            margin-top: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1><i class="fas fa-images"></i> Carousel Test Page</h1>
+            <p>Test the carousel functionality for IBM Watson Assistant</p>
+        </div>
+
+        <div class="test-section">
+            <h2>Sample Carousel Data</h2>
+            <p>Use these sample data structures in your IBM Watson Assistant dialog nodes:</p>
+            
+            <div class="test-buttons">
+                <button class="test-btn" onclick="showSample('medical')">Medical Services</button>
+                <button class="test-btn" onclick="showSample('doctors')">Doctors</button>
+                <button class="test-btn" onclick="showSample('medicines')">Medicines</button>
+                <button class="test-btn" onclick="showSample('appointments')">Appointments</button>
+            </div>
+
+            <div id="jsonDisplay" class="json-display">
+                Click a button above to see sample JSON data
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Live Carousel Demo</h2>
+            <p>See how the carousel will look in your chatbot:</p>
+            
+            <div class="carousel-demo">
+                <div id="carouselDemo"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>IBM Watson Assistant Setup Instructions</h2>
+            <ol>
+                <li><strong>Create a Dialog Node</strong> in your Watson Assistant</li>
+                <li><strong>Add a Response</strong> with type "JSON Editor"</li>
+                <li><strong>Use the JSON structure</strong> shown above</li>
+                <li><strong>Set response_type</strong> to "user_defined"</li>
+                <li><strong>Add user_defined_type</strong> as "carousel"</li>
+                <li><strong>Include carousel_data</strong> array with your items</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script>
+        const sampleData = {
+            medical: {
+                generic: [{
+                    response_type: "user_defined",
+                    user_defined: {
+                        user_defined_type: "carousel",
+                        carousel_data: [
+                            {
+                                title: "Primary Care",
+                                description: "Comprehensive health care for all ages. Annual checkups, vaccinations, and preventive care.",
+                                icon: "fas fa-user-md",
+                                alt: "Primary Care"
+                            },
+                            {
+                                title: "Cardiology",
+                                description: "Specialized heart care and cardiovascular treatments. Expert diagnosis and treatment plans.",
+                                icon: "fas fa-heartbeat",
+                                alt: "Cardiology"
+                            },
+                            {
+                                title: "Pediatrics",
+                                description: "Specialized care for children and adolescents. Growth monitoring and developmental support.",
+                                icon: "fas fa-baby",
+                                alt: "Pediatrics"
+                            },
+                            {
+                                title: "Emergency Care",
+                                description: "24/7 emergency medical services. Immediate care for urgent health situations.",
+                                icon: "fas fa-ambulance",
+                                alt: "Emergency Care"
+                            }
+                        ]
+                    }
+                }]
+            },
+            doctors: {
+                generic: [{
+                    response_type: "user_defined",
+                    user_defined: {
+                        user_defined_type: "carousel",
+                        carousel_data: [
+                            {
+                                title: "Dr. Sarah Johnson",
+                                description: "Cardiologist with 15+ years experience. Specializes in heart disease prevention and treatment.",
+                                icon: "fas fa-user-md",
+                                alt: "Dr. Sarah Johnson"
+                            },
+                            {
+                                title: "Dr. Michael Chen",
+                                description: "Pediatrician with expertise in child development. Available for consultations and checkups.",
+                                icon: "fas fa-user-md",
+                                alt: "Dr. Michael Chen"
+                            },
+                            {
+                                title: "Dr. Emily Rodriguez",
+                                description: "Family medicine specialist. Provides comprehensive care for all family members.",
+                                icon: "fas fa-user-md",
+                                alt: "Dr. Emily Rodriguez"
+                            }
+                        ]
+                    }
+                }]
+            },
+            medicines: {
+                generic: [{
+                    response_type: "user_defined",
+                    user_defined: {
+                        user_defined_type: "carousel",
+                        carousel_data: [
+                            {
+                                title: "Pain Relief",
+                                description: "Over-the-counter pain medications for headaches, muscle pain, and fever relief.",
+                                icon: "fas fa-pills",
+                                alt: "Pain Relief"
+                            },
+                            {
+                                title: "Antibiotics",
+                                description: "Prescription antibiotics for bacterial infections. Available with doctor's prescription.",
+                                icon: "fas fa-capsules",
+                                alt: "Antibiotics"
+                            },
+                            {
+                                title: "Vitamins",
+                                description: "Essential vitamins and supplements for daily health maintenance and wellness.",
+                                icon: "fas fa-vitamin",
+                                alt: "Vitamins"
+                            }
+                        ]
+                    }
+                }]
+            },
+            appointments: {
+                generic: [{
+                    response_type: "user_defined",
+                    user_defined: {
+                        user_defined_type: "carousel",
+                        carousel_data: [
+                            {
+                                title: "Book Appointment",
+                                description: "Schedule a consultation with our medical professionals. Choose your preferred time and doctor.",
+                                icon: "fas fa-calendar-plus",
+                                alt: "Book Appointment"
+                            },
+                            {
+                                title: "Reschedule",
+                                description: "Need to change your appointment? We can help you find a better time slot.",
+                                icon: "fas fa-calendar-alt",
+                                alt: "Reschedule"
+                            },
+                            {
+                                title: "Cancel Appointment",
+                                description: "Cancel your existing appointment. Please provide 24 hours notice when possible.",
+                                icon: "fas fa-calendar-times",
+                                alt: "Cancel Appointment"
+                            }
+                        ]
+                    }
+                }]
+            }
+        };
+
+        function showSample(type) {
+            const data = sampleData[type];
+            document.getElementById('jsonDisplay').textContent = JSON.stringify(data, null, 2);
+            
+            // Create live demo
+            createCarouselDemo(data.generic[0].user_defined.carousel_data);
+        }
+
+        function createCarouselDemo(carouselData) {
+            const demoContainer = document.getElementById('carouselDemo');
+            
+            demoContainer.innerHTML = `
+                <div class="Carousel">
+                    <div class="swiper">
+                        <div class="swiper-wrapper"></div>
+                    </div>
+                    <div class="Carousel__Navigation">
+                        <button type="button" class="Carousel__NavigationButton Carousel__NavigationPrevious">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="Carousel__BulletContainer"></div>
+                        <button type="button" class="Carousel__NavigationButton Carousel__NavigationNext">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const slidesContainer = demoContainer.querySelector('.swiper-wrapper');
+            
+            carouselData.forEach((cardData, index) => {
+                const { title, description, icon } = cardData;
+                const slideElement = document.createElement('div');
+                slideElement.classList.add('swiper-slide');
+                
+                const iconHtml = icon ? `<i class="${icon}"></i>` : '<i class="fas fa-info-circle"></i>';
+                
+                slideElement.innerHTML = `
+                    <div class="Carousel__Card">
+                        <div class="Carousel__CardImage">
+                            ${iconHtml}
+                        </div>
+                        <div class="Carousel__CardText">
+                            <div class="Carousel__CardTitle">${title}</div>
+                            <div class="Carousel__CardDescription">${description}</div>
+                        </div>
+                        <button type="button" class="Carousel__CardButton" onclick="alert('Clicked: ${title}')">
+                            Tell me more about this
+                        </button>
+                    </div>
+                `;
+                
+                slidesContainer.appendChild(slideElement);
+            });
+
+            // Initialize Swiper
+            new Swiper(demoContainer.querySelector('.swiper'), {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: false,
+                pagination: {
+                    el: demoContainer.querySelector('.Carousel__BulletContainer'),
+                    clickable: true,
+                    bulletClass: 'swiper-pagination-bullet',
+                    bulletActiveClass: 'swiper-pagination-bullet-active',
+                },
+                navigation: {
+                    nextEl: demoContainer.querySelector('.Carousel__NavigationNext'),
+                    prevEl: demoContainer.querySelector('.Carousel__NavigationPrevious'),
+                },
+                breakpoints: {
+                    768: {
+                        slidesPerView: 2,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                    }
+                }
+            });
+        }
+
+        // Show default sample
+        showSample('medical');
+    </script>
+</body>
+</html> 

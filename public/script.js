@@ -221,16 +221,134 @@ class Chatbot {
                     this.addBotMessage(item.text);
                 } else if (item.response_type === 'option') {
                     this.addOptionButtons(item.options);
+                } else if (item.response_type === 'user_defined') {
+                    this.handleCustomResponse(item);
                 }
             });
         } else if (watsonResponse && watsonResponse.output && watsonResponse.output.text) {
             // Handle simple text responses
             this.addBotMessage(watsonResponse.output.text);
         } else {
-            // Fallback for unexpected response format
-            console.log('Unexpected response format:', data);
-            this.addBotMessage('I received your message but encountered an issue processing the response.');
+            this.addBotMessage('Sorry, I encountered an error. Please try again.');
         }
+    }
+
+    handleCustomResponse(item) {
+        if (item.user_defined && item.user_defined.user_defined_type === 'carousel') {
+            this.createCarousel(item.user_defined.carousel_data);
+        } else {
+            // Handle other custom response types
+            this.addBotMessage('Received custom response: ' + JSON.stringify(item.user_defined));
+        }
+    }
+
+    createCarousel(carouselData) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message bot-message';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.innerHTML = '<div class="medical-robot-icon-small"><i class="fas fa-robot"></i><i class="fas fa-cross"></i></div>';
+        
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        
+        // Create carousel HTML structure
+        content.innerHTML = `
+            <div class="Carousel">
+                <div class="swiper">
+                    <div class="swiper-wrapper"></div>
+                </div>
+                <div class="Carousel__Navigation">
+                    <button type="button" class="Carousel__NavigationButton Carousel__NavigationPrevious">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="Carousel__BulletContainer"></div>
+                    <button type="button" class="Carousel__NavigationButton Carousel__NavigationNext">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(content);
+        this.chatMessages.appendChild(messageDiv);
+        
+        // Create slides
+        const slidesContainer = content.querySelector('.swiper-wrapper');
+        this.createSlides(slidesContainer, carouselData);
+        
+        // Initialize Swiper
+        const swiper = new Swiper(content.querySelector('.swiper'), {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: false,
+            pagination: {
+                el: content.querySelector('.Carousel__BulletContainer'),
+                clickable: true,
+                bulletClass: 'swiper-pagination-bullet',
+                bulletActiveClass: 'swiper-pagination-bullet-active',
+            },
+            navigation: {
+                nextEl: content.querySelector('.Carousel__NavigationNext'),
+                prevEl: content.querySelector('.Carousel__NavigationPrevious'),
+            },
+            breakpoints: {
+                768: {
+                    slidesPerView: 2,
+                },
+                1024: {
+                    slidesPerView: 3,
+                }
+            }
+        });
+        
+        this.scrollToBottom();
+    }
+
+    createSlides(slidesContainer, carouselData) {
+        carouselData.forEach((cardData, index) => {
+            const { url, title, description, alt, icon } = cardData;
+            const slideElement = document.createElement('div');
+            slideElement.classList.add('swiper-slide');
+            
+            // Use icon if provided, otherwise use a default icon
+            const iconHtml = icon ? `<i class="${icon}"></i>` : '<i class="fas fa-info-circle"></i>';
+            
+            slideElement.innerHTML = `
+                <div class="Carousel__Card">
+                    <div class="Carousel__CardImage">
+                        ${iconHtml}
+                    </div>
+                    <div class="Carousel__CardText">
+                        <div class="Carousel__CardTitle">${title}</div>
+                        <div class="Carousel__CardDescription">${description}</div>
+                    </div>
+                    <button type="button" class="Carousel__CardButton Carousel__CardButtonMessage" data-index="${index}">
+                        Tell me more about this
+                    </button>
+                </div>
+            `;
+            
+            // Add click event for the button
+            const button = slideElement.querySelector('.Carousel__CardButtonMessage');
+            button.addEventListener('click', () => {
+                this.handleCarouselButtonClick(title, description, index);
+            });
+            
+            slidesContainer.appendChild(slideElement);
+        });
+    }
+
+    handleCarouselButtonClick(title, description, index) {
+        // Add user message showing what they clicked
+        this.addUserMessage(`I'm interested in: ${title}`);
+        
+        // Simulate bot response (you can customize this)
+        setTimeout(() => {
+            this.addBotMessage(`Great choice! Here's more information about ${title}: ${description}<br>Is there anything I can help you with ?`);
+        }, 500);
     }
 
     addUserMessage(text) {
