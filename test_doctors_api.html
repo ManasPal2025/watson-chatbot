@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors API Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .api-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .api-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .endpoint {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin-bottom: 10px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .get { background: #28a745; color: white; }
+        .post { background: #007bff; color: white; }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .doctor-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .doctor-name {
+            font-weight: bold;
+            color: #495057;
+            font-size: 18px;
+        }
+        
+        .doctor-type {
+            color: #007bff;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .doctor-email {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .doctor-location {
+            color: #28a745;
+            font-weight: 500;
+        }
+        
+        .doctor-available {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .available-true {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .available-false {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👨‍⚕️ Doctors API Test Interface</h1>
+        <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">
+            Test endpoints for IBM Watson webhook integration - 12 doctors across 4 specialties
+        </p>
+        
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Total Doctors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Specialties</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">9</div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Unavailable</div>
+            </div>
+        </div>
+        
+        <!-- Get All Doctors -->
+        <div class="api-section">
+            <h3>📋 Get All Doctors</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/doctors</code>
+            </div>
+            <button onclick="getAllDoctors()">Get All Doctors</button>
+            <div id="all-doctors-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Get Doctor by ID -->
+        <div class="api-section">
+            <h3>🔍 Get Doctor by ID</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/doctors/:id</code>
+            </div>
+            <div class="input-group">
+                <input type="number" id="doctor-id" placeholder="Enter ID (1-12)" min="1" max="12">
+                <button onclick="getDoctorById()">Get Doctor</button>
+            </div>
+            <div id="doctor-by-id-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Search Doctors -->
+        <div class="api-section">
+            <h3>🔎 Search Doctors</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/doctors/search</code>
+            </div>
+            <div class="input-group">
+                <input type="text" id="search-query" placeholder="Enter search term" style="width: 200px;">
+                <select id="doctor-type-filter">
+                    <option value="">All Types</option>
+                    <option value="cardiologist">Cardiologist</option>
+                    <option value="neurologist">Neurologist</option>
+                    <option value="family physician">Family Physician</option>
+                    <option value="dermatologist">Dermatologist</option>
+                </select>
+                <select id="availability-filter">
+                    <option value="">All Availability</option>
+                    <option value="true">Available</option>
+                    <option value="false">Unavailable</option>
+                </select>
+                <button onclick="searchDoctors()">Search</button>
+            </div>
+            <div id="search-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Get Doctors by Type -->
+        <div class="api-section">
+            <h3>🏥 Get Doctors by Specialty</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/doctors/type/:type</code>
+            </div>
+            <button onclick="getDoctorsByType('cardiologist')">Cardiologists</button>
+            <button onclick="getDoctorsByType('neurologist')">Neurologists</button>
+            <button onclick="getDoctorsByType('family physician')">Family Physicians</button>
+            <button onclick="getDoctorsByType('dermatologist')">Dermatologists</button>
+            <div id="doctors-by-type-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Get Available Doctors -->
+        <div class="api-section">
+            <h3>✅ Get Available/Unavailable Doctors</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/doctors/available/:status</code>
+            </div>
+            <button onclick="getAvailableDoctors('available')">Available Doctors</button>
+            <button onclick="getAvailableDoctors('unavailable')">Unavailable Doctors</button>
+            <div id="available-doctors-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Get Recommendations -->
+        <div class="api-section">
+            <h3>💡 Get Doctor Recommendations</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/doctors/recommend/:specialty</code>
+            </div>
+            <button onclick="getRecommendations('heart')">Heart/Cardiac</button>
+            <button onclick="getRecommendations('brain')">Brain/Neurological</button>
+            <button onclick="getRecommendations('general')">General/Family</button>
+            <button onclick="getRecommendations('skin')">Skin/Dermatology</button>
+            <div id="recommendations-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Watson Integration Info -->
+        <div class="api-section">
+            <h3>🤖 IBM Watson Webhook Integration</h3>
+            <p><strong>Base URL:</strong> <code>http://localhost:3000</code></p>
+            <p><strong>Available Endpoints:</strong></p>
+            <ul>
+                <li><code>GET /api/doctors</code> - Get all doctors</li>
+                <li><code>GET /api/doctors/:id</code> - Get specific doctor</li>
+                <li><code>POST /api/doctors/search</code> - Search doctors</li>
+                <li><code>GET /api/doctors/type/:type</code> - Get doctors by specialty</li>
+                <li><code>GET /api/doctors/available/:status</code> - Get available/unavailable doctors</li>
+                <li><code>GET /api/doctors/recommend/:specialty</code> - Get recommendations</li>
+            </ul>
+            <p><strong>Response Format:</strong> All endpoints return JSON with <code>success</code>, <code>message</code>, and <code>data</code> fields.</p>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = 'http://localhost:3000';
+        
+        async function getAllDoctors() {
+            try {
+                const response = await fetch(`${baseUrl}/api/doctors`);
+                const data = await response.json();
+                displayResult('all-doctors-result', data);
+            } catch (error) {
+                displayResult('all-doctors-result', { error: error.message });
+            }
+        }
+        
+        async function getDoctorById() {
+            const id = document.getElementById('doctor-id').value;
+            if (!id) {
+                alert('Please enter an ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/doctors/${id}`);
+                const data = await response.json();
+                displayResult('doctor-by-id-result', data);
+            } catch (error) {
+                displayResult('doctor-by-id-result', { error: error.message });
+            }
+        }
+        
+        async function searchDoctors() {
+            const query = document.getElementById('search-query').value;
+            const doctorType = document.getElementById('doctor-type-filter').value;
+            const available = document.getElementById('availability-filter').value;
+            
+            const searchData = {};
+            if (query) searchData.query = query;
+            if (doctorType) searchData.doctor_type = doctorType;
+            if (available) searchData.available = available === 'true';
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/doctors/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(searchData)
+                });
+                const data = await response.json();
+                displayResult('search-result', data);
+            } catch (error) {
+                displayResult('search-result', { error: error.message });
+            }
+        }
+        
+        async function getDoctorsByType(type) {
+            try {
+                const response = await fetch(`${baseUrl}/api/doctors/type/${type}`);
+                const data = await response.json();
+                displayResult('doctors-by-type-result', data);
+            } catch (error) {
+                displayResult('doctors-by-type-result', { error: error.message });
+            }
+        }
+        
+        async function getAvailableDoctors(status) {
+            try {
+                const response = await fetch(`${baseUrl}/api/doctors/available/${status}`);
+                const data = await response.json();
+                displayResult('available-doctors-result', data);
+            } catch (error) {
+                displayResult('available-doctors-result', { error: error.message });
+            }
+        }
+        
+        async function getRecommendations(specialty) {
+            try {
+                const response = await fetch(`${baseUrl}/api/doctors/recommend/${specialty}`);
+                const data = await response.json();
+                displayResult('recommendations-result', data);
+            } catch (error) {
+                displayResult('recommendations-result', { error: error.message });
+            }
+        }
+        
+        function displayResult(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html> 

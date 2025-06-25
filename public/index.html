@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBM Watson Assistant - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Login Container -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="login-logo">
+                    <div class="medical-robot-icon">
+                        <i class="fas fa-robot"></i>
+                        <i class="fas fa-cross"></i>
+                    </div>
+                </div>
+                <h2>IBM Watson Assistant</h2>
+                <p>Please login to access the chatbot</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter password">
+                </div>
+                <div class="error-message" id="loginError" style="display: none;"></div>
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chatbot Container (Hidden initially) -->
+    <div class="chatbot-container" id="chatbotContainer" style="display: none;">
+        <!-- Background particles -->
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <!-- Chatbot -->
+            <div class="chatbot-wrapper">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="header-content">
+                            <div class="bot-avatar">
+                                <div class="medical-robot-icon">
+                                    <i class="fas fa-robot"></i>
+                                    <i class="fas fa-cross"></i>
+                                </div>
+                            </div>
+                            <div class="header-info">
+                                <h2>Watson Assistant</h2>
+                                <p class="status" id="status">Connecting...</p>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <button class="dashboard-btn" id="dashboardBtn" title="Dashboard">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                            <button class="broadcast-btn" id="broadcastBtn" title="Broadcast Messages">
+                                <i class="fas fa-broadcast-tower"></i>
+                            </button>
+                            <button class="logout-btn" id="logoutBtn" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="chat-description">
+                        <p>Your AI-powered medical assistant. Ask me anything about health, medicine, or general questions!</p>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot-message">
+                            <div class="message-content">
+                                <div class="message-avatar">
+                                    <div class="medical-robot-icon-small">
+                                        <i class="fas fa-robot"></i>
+                                        <i class="fas fa-cross"></i>
+                                    </div>
+                                </div>
+                                <div class="message-text">
+                                    Hello! I'm your AI assistant powered by IBM Watson. How can I help you today?
+                                </div>
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+
+                    <!-- Bot typing indicator -->
+                    <div class="bot-typing-indicator" id="botTypingIndicator" style="display: none;">
+                        <div class="message-avatar">
+                            <div class="medical-robot-icon-small">
+                                <i class="fas fa-robot"></i>
+                                <i class="fas fa-cross"></i>
+                            </div>
+                        </div>
+                        <div class="bot-typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span>Watson is typing...</span>
+                    </div>
+
+                    <!-- User typing indicator -->
+                    <div class="user-typing-indicator" id="userTypingIndicator" style="display: none;">
+                        <span>You are typing</span>
+                        <div class="user-typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="Type your message here..." maxlength="500">
+                        <label for="fileInput" class="upload-btn">
+                            <i class="fas fa-paperclip"></i>
+                        </label>
+                        <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx">
+                        <button id="sendBtn" class="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Modal -->
+        <div class="modal" id="dashboardModal">
+            <div class="modal-content dashboard-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-line"></i> System Dashboard</h2>
+                    <button class="close-btn" id="closeDashboard">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="dashboard-grid">
+                        <!-- KPI Cards -->
+                        <div class="kpi-section">
+                            <h3>Key Performance Indicators</h3>
+                            <div class="kpi-cards">
+                                <div class="kpi-card">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="kpi-content">
+                                        <h4>Active Users</h4>
+                                        <p class="kpi-value">1,247</p>
+                                        <span class="kpi-change positive">+12%</span>
+                                    </div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="kpi-content">
+                                        <h4>Total Conversations</h4>
+                                        <p class="kpi-value">8,934</p>
+                                        <span class="kpi-change positive">+8%</span>
+                                    </div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="kpi-content">
+                                        <h4>Avg Response Time</h4>
+                                        <p class="kpi-value">1.2s</p>
+                                        <span class="kpi-change negative">-15%</span>
+                                    </div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </div>
+                                    <div class="kpi-content">
+                                        <h4>Satisfaction Rate</h4>
+                                        <p class="kpi-value">94.2%</p>
+                                        <span class="kpi-change positive">+2%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts -->
+                        <div class="charts-section">
+                            <div class="chart-container">
+                                <h3>Conversation Trends</h3>
+                                <canvas id="conversationChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h3>User Activity Distribution</h3>
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="activity-section">
+                            <h3>Recent Activity</h3>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>New user registered</p>
+                                        <span>2 minutes ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-comment"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>High-priority conversation started</p>
+                                        <span>5 minutes ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>System maintenance completed</p>
+                                        <span>15 minutes ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-download"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>New update deployed</p>
+                                        <span>1 hour ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Status -->
+                        <div class="status-section">
+                            <h3>System Status</h3>
+                            <div class="status-grid">
+                                <div class="status-item online">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Watson API</span>
+                                </div>
+                                <div class="status-item online">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Database</span>
+                                </div>
+                                <div class="status-item online">
+                                    <i class="fas fa-circle"></i>
+                                    <span>File Storage</span>
+                                </div>
+                                <div class="status-item warning">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Analytics</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Broadcast Modal -->
+        <div class="modal" id="broadcastModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-broadcast-tower"></i> System Broadcast</h2>
+                    <button class="close-btn" id="closeBroadcast">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="broadcast-message">
+                        <h3>🛠️ Maintenance Notice</h3>
+                        <p>We will be performing scheduled maintenance on Sunday, December 15th, from 2:00 AM to 4:00 AM EST. During this time, the chatbot service may experience brief interruptions. We apologize for any inconvenience.</p>
+                    </div>
+                    <div class="broadcast-message">
+                        <h3>🎉 IBM Watson Medicare Update</h3>
+                        <p>We're excited to announce that our chatbot now integrates with IBM Watson Medicare services, providing enhanced healthcare assistance and medical information. Try asking about Medicare benefits, coverage, or healthcare providers!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="/privacy" class="footer-link">Privacy Policy</a>
+                <span class="footer-separator">|</span>
+                <a href="/terms" class="footer-link">Terms of Use</a>
+            </div>
+            <div class="footer-text">
+                <p>&copy; 2024 IBM Watson Assistant. Powered by IBM Watsonx Assistant v5.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine API Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .api-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .api-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .endpoint {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin-bottom: 10px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .get { background: #28a745; color: white; }
+        .post { background: #007bff; color: white; }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .medicine-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .medicine-name {
+            font-weight: bold;
+            color: #495057;
+            font-size: 18px;
+        }
+        
+        .medicine-brand {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .medicine-dosage {
+            color: #28a745;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Medicine API Test Interface</h1>
+        <p style="text-align: center; color: #6c757d; margin-bottom: 30px;">
+            Test endpoints for IBM Watson webhook integration
+        </p>
+        
+        <!-- Get All Medicines -->
+        <div class="api-section">
+            <h3>📋 Get All Medicines</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/medicines</code>
+            </div>
+            <button onclick="getAllMedicines()">Get All Medicines</button>
+            <div id="all-medicines-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Get Medicine by ID -->
+        <div class="api-section">
+            <h3>🔍 Get Medicine by ID</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/medicines/:id</code>
+            </div>
+            <input type="number" id="medicine-id" placeholder="Enter ID (1-5)" min="1" max="5" style="padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px;">
+            <button onclick="getMedicineById()">Get Medicine</button>
+            <div id="medicine-by-id-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Search Medicines -->
+        <div class="api-section">
+            <h3>🔎 Search Medicines</h3>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <code>/api/medicines/search</code>
+            </div>
+            <input type="text" id="search-query" placeholder="Enter search term" style="padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+            <button onclick="searchMedicines()">Search</button>
+            <div id="search-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Get Recommendations -->
+        <div class="api-section">
+            <h3>💊 Get Medicine Recommendations</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <code>/api/medicines/recommend/:condition</code>
+            </div>
+            <button onclick="getRecommendations('pain')">Pain/Fever</button>
+            <button onclick="getRecommendations('acid reflux')">Acid Reflux</button>
+            <button onclick="getRecommendations('diabetes')">Diabetes</button>
+            <button onclick="getRecommendations('hypertension')">High Blood Pressure</button>
+            <div id="recommendations-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Watson Integration Info -->
+        <div class="api-section">
+            <h3>🤖 IBM Watson Webhook Integration</h3>
+            <p><strong>Base URL:</strong> <code>http://localhost:3000</code></p>
+            <p><strong>Available Endpoints:</strong></p>
+            <ul>
+                <li><code>GET /api/medicines</code> - Get all medicines</li>
+                <li><code>GET /api/medicines/:id</code> - Get specific medicine</li>
+                <li><code>POST /api/medicines/search</code> - Search medicines</li>
+                <li><code>GET /api/medicines/recommend/:condition</code> - Get recommendations</li>
+            </ul>
+            <p><strong>Response Format:</strong> All endpoints return JSON with <code>success</code>, <code>message</code>, and <code>data</code> fields.</p>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = 'http://localhost:3000';
+        
+        async function getAllMedicines() {
+            try {
+                const response = await fetch(`${baseUrl}/api/medicines`);
+                const data = await response.json();
+                displayResult('all-medicines-result', data);
+            } catch (error) {
+                displayResult('all-medicines-result', { error: error.message });
+            }
+        }
+        
+        async function getMedicineById() {
+            const id = document.getElementById('medicine-id').value;
+            if (!id) {
+                alert('Please enter an ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/medicines/${id}`);
+                const data = await response.json();
+                displayResult('medicine-by-id-result', data);
+            } catch (error) {
+                displayResult('medicine-by-id-result', { error: error.message });
+            }
+        }
+        
+        async function searchMedicines() {
+            const query = document.getElementById('search-query').value;
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/medicines/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+                const data = await response.json();
+                displayResult('search-result', data);
+            } catch (error) {
+                displayResult('search-result', { error: error.message });
+            }
+        }
+        
+        async function getRecommendations(condition) {
+            try {
+                const response = await fetch(`${baseUrl}/api/medicines/recommend/${condition}`);
+                const data = await response.json();
+                displayResult('recommendations-result', data);
+            } catch (error) {
+                displayResult('recommendations-result', { error: error.message });
+            }
+        }
+        
+        function displayResult(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html> 

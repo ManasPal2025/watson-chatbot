@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Indicator Test</title>
+    <link rel="stylesheet" href="public/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>Typing Indicator Test</h2>
+        
+        <div class="test-section">
+            <h3>User Typing Indicator</h3>
+            <button class="test-button" onclick="showUserTyping()">Show User Typing</button>
+            <button class="test-button" onclick="hideUserTyping()">Hide User Typing</button>
+            
+            <!-- User typing indicator -->
+            <div class="user-typing-indicator" id="userTypingIndicator">
+                <div class="message-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>You are typing...</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Bot Typing Indicator</h3>
+            <button class="test-button" onclick="showBotTyping()">Show Bot Typing</button>
+            <button class="test-button" onclick="hideBotTyping()">Hide Bot Typing</button>
+            
+            <!-- Bot typing indicator -->
+            <div class="bot-typing-indicator" id="botTypingIndicator">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bot-typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>Watson is typing...</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Input Field Test</h3>
+            <input type="text" id="testInput" placeholder="Type here to test user typing indicator..." style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 10px; margin-bottom: 10px;">
+            <p>Start typing in the input field above to see the user typing indicator.</p>
+        </div>
+    </div>
+
+    <script>
+        function showUserTyping() {
+            document.getElementById('userTypingIndicator').style.display = 'flex';
+        }
+        
+        function hideUserTyping() {
+            document.getElementById('userTypingIndicator').style.display = 'none';
+        }
+        
+        function showBotTyping() {
+            document.getElementById('botTypingIndicator').style.display = 'flex';
+        }
+        
+        function hideBotTyping() {
+            document.getElementById('botTypingIndicator').style.display = 'none';
+        }
+        
+        // Test input field functionality
+        const testInput = document.getElementById('testInput');
+        let typingTimeout;
+        
+        testInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                showUserTyping();
+                
+                // Clear existing timeout
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                }
+                
+                // Hide after 2 seconds of no typing
+                typingTimeout = setTimeout(() => {
+                    hideUserTyping();
+                }, 2000);
+            } else {
+                hideUserTyping();
+            }
+        });
+        
+        testInput.addEventListener('blur', function() {
+            hideUserTyping();
+        });
+    </script>
+</body>
+</html> 
