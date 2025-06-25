@@ -6,9 +6,33 @@ class Chatbot {
             password: 'Admin@123'
         };
         
+        // Check if Swiper is available
+        this.checkSwiperAvailability();
+        
         this.initializeElements();
         this.setupEventListeners();
         this.checkAuthentication();
+    }
+
+    checkSwiperAvailability() {
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.verifySwiper();
+            });
+        } else {
+            this.verifySwiper();
+        }
+    }
+
+    verifySwiper() {
+        if (typeof Swiper === 'undefined') {
+            console.warn('Swiper library not loaded. Carousel functionality will use fallback cards.');
+            this.swiperAvailable = false;
+        } else {
+            console.log('Swiper library loaded successfully');
+            this.swiperAvailable = true;
+        }
     }
 
     initializeElements() {
@@ -243,68 +267,112 @@ class Chatbot {
     }
 
     createCarousel(carouselData) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message bot-message';
-        
-        const avatar = document.createElement('div');
-        avatar.className = 'message-avatar';
-        avatar.innerHTML = '<div class="medical-robot-icon-small"><i class="fas fa-robot"></i><i class="fas fa-cross"></i></div>';
-        
-        const content = document.createElement('div');
-        content.className = 'message-content';
-        
-        // Create carousel HTML structure
-        content.innerHTML = `
-            <div class="Carousel">
-                <div class="swiper">
-                    <div class="swiper-wrapper"></div>
-                </div>
-                <div class="Carousel__Navigation">
-                    <button type="button" class="Carousel__NavigationButton Carousel__NavigationPrevious">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div class="Carousel__BulletContainer"></div>
-                    <button type="button" class="Carousel__NavigationButton Carousel__NavigationNext">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        messageDiv.appendChild(avatar);
-        messageDiv.appendChild(content);
-        this.chatMessages.appendChild(messageDiv);
-        
-        // Create slides
-        const slidesContainer = content.querySelector('.swiper-wrapper');
-        this.createSlides(slidesContainer, carouselData);
-        
-        // Initialize Swiper
-        const swiper = new Swiper(content.querySelector('.swiper'), {
-            slidesPerView: 1,
-            spaceBetween: 20,
-            loop: false,
-            pagination: {
-                el: content.querySelector('.Carousel__BulletContainer'),
-                clickable: true,
-                bulletClass: 'swiper-pagination-bullet',
-                bulletActiveClass: 'swiper-pagination-bullet-active',
-            },
-            navigation: {
-                nextEl: content.querySelector('.Carousel__NavigationNext'),
-                prevEl: content.querySelector('.Carousel__NavigationPrevious'),
-            },
-            breakpoints: {
-                768: {
-                    slidesPerView: 2,
-                },
-                1024: {
-                    slidesPerView: 3,
-                }
+        try {
+            // Check if Swiper is available
+            if (!this.swiperAvailable || typeof Swiper === 'undefined') {
+                console.warn('Swiper not available, using fallback cards');
+                this.createFallbackCards(carouselData);
+                return;
             }
-        });
-        
-        this.scrollToBottom();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = '<div class="medical-robot-icon-small"><i class="fas fa-robot"></i><i class="fas fa-cross"></i></div>';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            // Create carousel HTML structure
+            content.innerHTML = `
+                <div class="Carousel">
+                    <div class="swiper">
+                        <div class="swiper-wrapper"></div>
+                    </div>
+                    <div class="Carousel__Navigation">
+                        <button type="button" class="Carousel__NavigationButton Carousel__NavigationPrevious">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="Carousel__BulletContainer"></div>
+                        <button type="button" class="Carousel__NavigationButton Carousel__NavigationNext">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            this.chatMessages.appendChild(messageDiv);
+            
+            // Create slides
+            const slidesContainer = content.querySelector('.swiper-wrapper');
+            this.createSlides(slidesContainer, carouselData);
+            
+            // Initialize Swiper with proper configuration and error handling
+            const swiperElement = content.querySelector('.swiper');
+            if (!swiperElement) {
+                throw new Error('Swiper element not found');
+            }
+
+            const swiper = new Swiper(swiperElement, {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: false,
+                allowTouchMove: true,
+                grabCursor: true,
+                watchSlidesProgress: true,
+                watchSlidesVisibility: true,
+                pagination: {
+                    el: content.querySelector('.Carousel__BulletContainer'),
+                    clickable: true,
+                    bulletClass: 'swiper-pagination-bullet',
+                    bulletActiveClass: 'swiper-pagination-bullet-active',
+                    type: 'bullets',
+                    dynamicBullets: false
+                },
+                navigation: {
+                    nextEl: content.querySelector('.Carousel__NavigationNext'),
+                    prevEl: content.querySelector('.Carousel__NavigationPrevious'),
+                    disabledClass: 'swiper-button-disabled',
+                    hiddenClass: 'swiper-button-hidden'
+                },
+                breakpoints: {
+                    768: {
+                        slidesPerView: 2,
+                        spaceBetween: 20
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 20
+                    }
+                },
+                on: {
+                    init: function() {
+                        console.log('Swiper initialized successfully');
+                        // Update navigation button states on init
+                        this.updateNavigation();
+                    },
+                    slideChange: function() {
+                        // Update navigation button states on slide change
+                        this.updateNavigation();
+                    },
+                    error: function(error) {
+                        console.error('Swiper error:', error);
+                    }
+                }
+            });
+            
+            console.log('Carousel created successfully with', carouselData.length, 'items');
+            this.scrollToBottom();
+            
+        } catch (error) {
+            console.error('Error creating carousel:', error);
+            // Fallback: show items as simple cards instead of carousel
+            this.createFallbackCards(carouselData);
+        }
     }
 
     createSlides(slidesContainer, carouselData) {
@@ -798,6 +866,56 @@ class Chatbot {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    createFallbackCards(carouselData) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message bot-message';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.innerHTML = '<div class="medical-robot-icon-small"><i class="fas fa-robot"></i><i class="fas fa-cross"></i></div>';
+        
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        
+        let cardsHTML = '<div class="fallback-cards">';
+        carouselData.forEach((cardData, index) => {
+            const { title, description, icon } = cardData;
+            const iconHtml = icon ? `<i class="${icon}"></i>` : '<i class="fas fa-info-circle"></i>';
+            
+            cardsHTML += `
+                <div class="fallback-card">
+                    <div class="fallback-card-image">
+                        ${iconHtml}
+                    </div>
+                    <div class="fallback-card-text">
+                        <div class="fallback-card-title">${title}</div>
+                        <div class="fallback-card-description">${description}</div>
+                    </div>
+                    <button type="button" class="fallback-card-button" data-index="${index}">
+                        Tell me more about this
+                    </button>
+                </div>
+            `;
+        });
+        cardsHTML += '</div>';
+        
+        content.innerHTML = cardsHTML;
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(content);
+        this.chatMessages.appendChild(messageDiv);
+        
+        // Add click events to fallback buttons
+        const buttons = content.querySelectorAll('.fallback-card-button');
+        buttons.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                const cardData = carouselData[index];
+                this.handleCarouselButtonClick(cardData.title, cardData.description, index);
+            });
+        });
+        
+        this.scrollToBottom();
     }
 }
 
